@@ -1,0 +1,9 @@
+name: ish
+version: 0.1.0
+
+authors:
+  - Kim Burgess <kim@acaprojects.com>
+
+crystal: 0.24.1
+
+license: MIT
