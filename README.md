@@ -8,9 +8,9 @@ Provides a set of common data structures that exhibit favourable space / time
 characteristics in exchange for precision.
 
 ## TODO
-[ ] Count-min sketch
-[ ] Bloom filter
-[ ] HyperLogLog
+- [ ] [Count-min sketch](src/ish/count_min_sketch.cr)
+- [ ] Bloom filter
+- [ ] HyperLogLog
 
 ## Installation
 
