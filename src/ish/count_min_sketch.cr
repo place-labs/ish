@@ -3,17 +3,15 @@ require "math"
 # A Count-Min sketch is a probabilistic data structure used for summarizing
 # streams of data in sub-linear space.
 #
-# Performance is modelled by the following two parameters:
+# Performance is modelled two parameters: *epsilon* (error factor) and *delta*
+# (probability of error).
 #
-#   epsilon: the error factor
-#     delta: probability of error
-#
-# With N insertions, the sketch will provide estimate counts within
+# With `N` insertions, the sketch will provide estimate counts within
 # `epsilon * N` of the true frequency at a probability of at least `1 - delta`.
 # It follows that the sketch never underestimates the true value, though it may
 # overestimate.
 #
-#   `true frequency <= estimate <= true frequency + epsilon * N``
+#   `true frequency <= estimate <= true frequency + epsilon * N`
 #
 # Error within estimates is proportional to the total aggregate number of
 # occurences seen, and to the epsilon. This also means significantly larger
@@ -63,7 +61,8 @@ class Ish::CountMinSketch
   # epsilon might be `0.0001`).
   #
   # An excellent resource that provides visualisation of different
-  # configurations can be found at http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html
+  # configurations can be found at
+  # http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html
   def initialize(@epsilon, @delta, seed = nil)
     assert_unit_interval @epsilon
     assert_unit_interval @delta
