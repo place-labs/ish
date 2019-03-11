@@ -51,15 +51,24 @@ describe CountMinSketch do
     end
 
     it "provides an estimate within stated bounds" do
-      # Insert some other noise
-      100000.times { instance << rand }
+      iterations = 1000000
+      counter    = Hash(String | Float64, UInt32).new { |h, k| h[k] = 0 }
+      n          = iterations + 1 # account for insertion of "Foo" above
+      tolerance  = instance.epsilon * n
 
-      estimate = instance.count "Foo"
-      actual   = 1000
-      n        = 100001
+      counter["Foo"] = 1000
 
-      actual.should be <= estimate
-      estimate.should be <= (actual + instance.epsilon * n)
+      iterations.times do
+        item = rand
+        instance << item
+        counter[item] += 1
+      end
+
+      counter.each do |item, actual|
+        estimate = instance.count item
+        actual.should be <= estimate
+        estimate.should be <= (actual + tolerance)
+      end
     end
   end
 end
