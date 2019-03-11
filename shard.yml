@@ -4,6 +4,11 @@ version: 0.1.0
 authors:
   - Kim Burgess <kim@acaprojects.com>
 
+description: |
+  Probabilistic data structures for good-ish computation.
+
+github: aca-labs/ish
+
 crystal: 0.24.1
 
 license: MIT
