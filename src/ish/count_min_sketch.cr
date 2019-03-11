@@ -75,6 +75,11 @@ class Ish::CountMinSketch
     self
   end
 
+  # Insert *item*, incrementing its count by 1.
+  def <<(item)
+    increment item, 1
+  end
+
   # Retrieve a frequency estimate for *item*.
   def count(item)
     buckets(item).map { |row, i| row.fetch i }
