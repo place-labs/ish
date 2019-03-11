@@ -44,18 +44,18 @@ class Ish::CountMinSketch
     width = (Math::E / epsilon).ceil.to_u
     depth = Math.log(1 / delta).ceil.to_u
 
-    @sketch = Array.new(width) { Array.new(depth, 0_u32) }
+    @sketch = Array.new(depth) { Array.new(width, 0_u32) }
   end
 
   # Increase the count of an item within the sketch.
   def increment(item, amount = 1)
-    buckets(item).each { |d, i| d.update(i, &.+(amount)) }
+    buckets(item).each { |row, i| row.update(i, &.+(amount)) }
     self
   end
 
   # Retrieve a frequency estimate for an item.
   def count(item)
-    buckets(item).map { |d, i| d.fetch i }
+    buckets(item).map { |row, i| row.fetch i }
                  .min
   end
 
