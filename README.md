@@ -1,7 +1,7 @@
 # ish
 
 [![GitHub release](https://img.shields.io/github/release/aca-labs/ish.svg)](https://github.com/aca-labs/ish/releases)
-[![Build Status](https://travis-ci.org/aca-labs/ish.svg?branch=master)](https://travis-ci.org/aca-labs/ish)
+[![Build Status](https://travis-ci.com/aca-labs/ish.svg?branch=master)](https://travis-ci.com/aca-labs/ish)
 [![Docs](https://img.shields.io/badge/docs-available-brightgreen.svg)](https://aca-labs.github.io/ish/)
 
 ![](https://www.charbase.com/images/glyph/8776)
