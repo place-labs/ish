@@ -26,7 +26,12 @@ require "math"
 # OPTIMIZE: support parallel hashing / increment / count operations when
 # supported by Crystal
 class Ish::CountMinSketch
-  @sketch : Array(Array(UInt32))
+  @epsilon : Float32 | Float64
+  @delta   : Float32 | Float64
+  @width   : UInt32
+  @depth   : UInt32
+  @sketch  : Array(Array(UInt32))
+  @seeds   : Array(UInt32)
 
   private macro assert_unit_interval(value)
     if {{value}} <= 0 || {{value}} >= 1
@@ -59,19 +64,26 @@ class Ish::CountMinSketch
   #
   # An excellent resource that provides visualisation of different
   # configurations can be found at http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html
-  def initialize(epsilon : Float32 | Float64, delta : Float32 | Float64)
-    assert_unit_interval epsilon
-    assert_unit_interval delta
+  def initialize(@epsilon, @delta, seed = nil)
+    assert_unit_interval @epsilon
+    assert_unit_interval @delta
 
-    width = (Math::E / epsilon).ceil.to_u
-    depth = Math.log(1 / delta).ceil.to_u
+    @width = (Math::E / @epsilon).ceil.to_u
+    @depth = Math.log(1 / @delta).ceil.to_u
 
-    @sketch = Array.new(depth) { Array.new(width, 0_u32) }
+    @sketch = Array.new(@depth) { Array.new(@width, 0_u32) }
+
+    r = seed ? Random.new(seed) : Random.new
+
+    @seeds = @depth.times.map { r.next_u }.to_a
   end
 
+  getter epsilon
+  getter delta
+
   # Increase the count of *item* within the sketch by *amount* (default 1).
-  def increment(item, amount = 1)
-    buckets(item).each { |row, i| row.update(i, &.+(amount)) }
+  def increment(item, amount : UInt32 = 1_u32)
+    buckets(item).each { |(row, i)| row.update(i, &.+(amount)) }
     self
   end
 
@@ -82,18 +94,44 @@ class Ish::CountMinSketch
 
   # Retrieve a frequency estimate for *item*.
   def count(item)
-    buckets(item).map { |row, i| row.fetch i }
-                 .min
+    buckets(item).map { |(row, i)| row.unsafe_fetch i }.min
   end
 
   # Provide an Iterator with the set of hashes for *item*.
   private def hash(item)
-    @hash_functions.each.map &.call(item)
+    @seeds.each.map { |seed| Hasher.hash item, seed, @width }
   end
 
   # Given an item, provide an Iterator containing a Tuple of each layer of the
   # sketch and the associated bucket index.
   private def buckets(item)
     @sketch.each.zip hash(item)
+  end
+
+  # Universal hash functions.
+  # OPTIMIZE: replace with a faster hash method
+  module Hasher
+    extend self
+
+    PRIME = (1 << 31) - 1
+
+    def hash(item, seed, width)
+      hash seed, 0, item.hash, width
+    end
+
+    def hash(a, b, x, m)
+      ((a * x + b) % PRIME) % m
+    end
+
+    # TODO test / bench this
+    def fast_hash(item, seed, width)
+      hash = seed * item.hash
+      # A super fast way of computing x mod 2^p-1
+      # See http://www.cs.princeton.edu/courses/archive/fall09/cos521/Handouts/universalclasses.pdf
+      # page 149, right after Proposition 7.
+      hash += hash >> 32
+      hash &= PRIME
+      hash.to_u32 % @width
+    end
   end
 end
