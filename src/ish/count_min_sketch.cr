@@ -59,7 +59,7 @@ class Ish::CountMinSketch
   #
   # An excellent resource that provides visualisation of different
   # configurations can be found at http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html
-  def initialize(epsilon : Float32, delta : Float32)
+  def initialize(epsilon : Float32 | Float64, delta : Float32 | Float64)
     assert_unit_interval epsilon
     assert_unit_interval delta
 
