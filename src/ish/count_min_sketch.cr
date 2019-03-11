@@ -1,58 +1,72 @@
-require "./tools/*"
 require "math"
 
 # A Count-Min sketch is a probabilistic data structure used for summarizing
 # streams of data in sub-linear space.
 #
-# It works as follows. Let `(epsilson, delta)` be two parameters that describe
-# the confidence in our error estimates, and let `d = ceil(ln 1/delta)` and
-# `w = ceil(e / epsilon)`.
+# Space requirements are bounded and are not dependant on the number of items
+# to be tracked. Instead, performance is modelled by the following two
+# parameters:
 #
-# Then:
+#   epsilon: the error factor
+#     delta: probability of error
 #
-# - Take `d` pairwise independent hash functions `h_i`, each of which maps
-#   onto the domain `[0, w - 1]`.
-# - Create a 2-dimensional table of counts, with `d` rows and `w` columns,
-#   initialized with all zeroes.
-# - When a new element x arrives in the stream, update the table of counts
-#   by setting `counts[i, h_i[x]] += 1`, for each `1 <= i <= d`.
-# - (Note the rough similarity to a Bloom filter.)
+# With N insertions, the sketch will provide estimate counts within
+# `epsilon * N` of the true frequency at a probability of at least `1 - delta`.
+# It follows that the sketch never underestimates the true value, though it may
+# overestimate.
 #
-# As an example application, suppose you want to estimate the number of times
-# an element `x` has appeared in a data stream so far. The Count-Min sketch
-# estimate of this frequency is
+#   `true frequency <= estimate <= true frequency + epsilon * N``
 #
-#   min_i { counts[i, h_i[x]] }
+# Error within estimates is proportional to the total aggregate number of
+# occurences seen, and to the epsilon. This also means significantly larger
+# truth values can dwarf smaller the error term producing more accurate
+# estimates for items with the largest counts.
 #
-# With probability at least `1 - delta`, this estimate is within `epsilon * N`
-# of the true frequency, i.e.
+# Further information and proofs can be found at
+# http://dimacs.rutgers.edu/~graham/pubs/papers/cmencyc.pdf
 #
-#   true frequency <= estimate <= true frequency + epsilon * N`
-#
-# where N is the total size of the stream so far.
+# OPTIMIZE: support parallel hashing / increment / count operations when
+# supported by Crystal
 class Ish::CountMinSketch
+  @sketch : Array(Array(UInt32))
 
-
-  # Create a count-min sketch of the specified size.
-  def initialize(@width : UInt32, @depth : UInt32)
-    #@table = Array.new(@width) { Array.new(@depth) }
+  private macro assert_unit_interval(value)
+    if {{value}} <= 0 || {{value}} >= 1
+      raise ArgumentError.new "{{value}} must be between 0 and 1, exclusive"
+    end
   end
 
   # Create a count-min sketch with the specified accuracy characteristics.
-  def self.new(epsilon : Float32 = 0.1, delta : Float32 = 1e-6)
-    Assert.bounded epsilon, 0, 1
-    Assert.bounded delta, 0, 1
+  def initialize(epsilon : Float32 = 0.1, delta : Float32 = 1e-6)
+    assert_unit_interval epsilon
+    assert_unit_interval delta
 
     width = (Math::E / epsilon).ceil.to_u
     depth = Math.log(1 / delta).ceil.to_u
 
-    super width, depth
+    @sketch = Array.new(width) { Array.new(depth, 0_u32) }
   end
 
-  def self.new(width : Int32, depth : Int32)
-    Assert.greater_than width, 0
-    Assert.greater_than depth, 0
+  # Increase the count of an item within the sketch.
+  def increment(item, amount = 1)
+    buckets(item).each { |d, i| d.update(i, &.+(amount)) }
+    self
+  end
 
-    new width.to_u, depth.to_u
+  # Retrieve a frequency estimate for an item.
+  def count(item)
+    buckets(item).map { |d, i| d.fetch i }
+                 .min
+  end
+
+  # Provide an Iterator with the set of hashes for an item.
+  private def hash(item)
+    @hash_functions.each.map &.call(item)
+  end
+
+  # Given an item, provide an iterator containing each layer of the sketch and
+  # it's associated bucket index.
+  private def buckets(item)
+    @sketch.each.zip hash(item)
   end
 end
