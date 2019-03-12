@@ -29,7 +29,7 @@ class Ish::CountMinSketch
   @width   : UInt32
   @depth   : UInt32
   @sketch  : Array(Array(UInt32))
-  @seeds   : Array(UInt32)
+  @seeds   : Array({UInt32, UInt32})
 
   private macro assert_unit_interval(value)
     if {{value}} <= 0 || {{value}} >= 1
@@ -74,7 +74,7 @@ class Ish::CountMinSketch
 
     r = seed ? Random.new(seed) : Random.new
 
-    @seeds = @depth.times.map { r.next_u }.to_a
+    @seeds = @depth.times.map { {r.next_u, r.next_u} }.to_a
   end
 
   getter epsilon
@@ -112,14 +112,14 @@ class Ish::CountMinSketch
   module Hasher
     extend self
 
-    PRIME = (1 << 31) - 1
+    P = (1 << 31) - 1
 
     def hash(item, seed, width)
-      hash seed, 0, item.hash, width
+      hash(*seed, item.hash, width)
     end
 
     def hash(a, b, x, m)
-      ((a * x + b) % PRIME) % m
+      ((a * x + b) % P) % m
     end
 
     # TODO test / bench this
@@ -129,8 +129,8 @@ class Ish::CountMinSketch
       # See http://www.cs.princeton.edu/courses/archive/fall09/cos521/Handouts/universalclasses.pdf
       # page 149, right after Proposition 7.
       hash += hash >> 32
-      hash &= PRIME
-      hash.to_u32 % @width
+      hash &= P
+      hash.to_u32 % width
     end
   end
 end
