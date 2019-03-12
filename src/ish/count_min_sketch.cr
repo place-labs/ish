@@ -6,12 +6,12 @@ require "math"
 # Performance is modelled two parameters: *epsilon* (error factor) and *delta*
 # (probability of error).
 #
-# With `N` insertions, the sketch will provide estimate counts within
-# `epsilon * N` of the true frequency at a probability of at least `1 - delta`.
-# It follows that the sketch never underestimates the true value, though it may
-# overestimate.
+# The sketch will provide estimate counts of the true frequency at a
+# probability of at least `1 - delta`. Due to internal collissions counts
+# provide may exceed the true frequency, but are garunteed to never
+# underestimate the true value.
 #
-#   `true frequency <= estimate <= true frequency + epsilon * N`
+#   `true frequency <= estimate
 #
 # Error within estimates is proportional to the total aggregate number of
 # occurences seen, and to the epsilon. This also means significantly larger
@@ -79,6 +79,8 @@ class Ish::CountMinSketch
 
   getter epsilon
   getter delta
+  getter width
+  getter depth
 
   # Increase the count of *item* within the sketch by *amount* (default 1).
   def increment(item, amount : UInt32 = 1_u32)

@@ -33,7 +33,7 @@ describe CountMinSketch do
   end
 
   describe "#count" do
-    instance = CountMinSketch.new epsilon: 1e-5, delta: 1e-2
+    instance = CountMinSketch.new epsilon: 1e-3, delta: 1e-2
 
     it "initializes with zero counts" do
       instance.count("Foo").should eq(0)
@@ -50,24 +50,28 @@ describe CountMinSketch do
       instance.count("Foo").should eq(1000)
     end
 
-    it "provides an estimate within stated bounds" do
-      iterations = 1000000
-      counter    = Hash(String | Float64, UInt32).new { |h, k| h[k] = 0 }
-      n          = iterations + 1 # account for insertion of "Foo" above
-      tolerance  = instance.epsilon * n
+    it "provides an good estimate for skewed datasets" do
+      counter = Hash(String | Float64, UInt32).new { |h, k| h[k] = 0 }
+      r = Random.new
 
-      counter["Foo"] = 1000
+      # Insert some noise with a even frequency distribution
+      50000.times { instance << r.rand }
 
-      iterations.times do
-        item = rand
-        instance << item
-        counter[item] += 1
+      # Insert and measure skewed values
+      100.times do
+        item = r.rand
+        count = r.rand(50..300).to_u
+        instance.increment item, count
+        counter[item] += count
       end
+
+      insertions = 51100 # includes previous tests
+      error = 2 * insertions / instance.width
 
       counter.each do |item, actual|
         estimate = instance.count item
-        actual.should be <= estimate
-        estimate.should be <= (actual + tolerance)
+        estimate.should be >= actual
+        estimate.should be_close(actual, error)
       end
     end
   end
