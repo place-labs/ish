@@ -9,6 +9,6 @@ description: |
 
 github: aca-labs/ish
 
-crystal: 0.24.1
+crystal: 0.27.2
 
 license: MIT
