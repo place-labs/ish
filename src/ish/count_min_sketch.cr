@@ -68,7 +68,7 @@ class Ish::CountMinSketch
     assert_unit_interval @delta
 
     @width = (Math::E / @epsilon).ceil.to_u
-    @depth = Math.log(1 / @delta).ceil.to_u
+    @depth = Math.log(1 / @delta, Math::E).ceil.to_u
 
     @sketch = Array.new(@depth) { Array.new(@width, 0_u32) }
 
