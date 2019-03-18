@@ -33,7 +33,7 @@ describe CountMinSketch do
   end
 
   describe "#count" do
-    instance = CountMinSketch.new epsilon: 1e-3, delta: 1e-2
+    instance = CountMinSketch.new epsilon: 3e-4, delta: 4e-2
 
     it "initializes with zero counts" do
       instance.count("Foo").should eq(0)
@@ -55,17 +55,17 @@ describe CountMinSketch do
       r = Random.new
 
       # Insert some noise with a even frequency distribution
-      50000.times { instance << r.rand }
+      100000.times { instance << r.rand }
 
       # Insert and measure skewed values
       100.times do
         item = r.rand
-        count = r.rand(50..300).to_u
+        count = r.rand(300..1000).to_u
         instance.increment item, count
         counter[item] += count
       end
 
-      insertions = 51100 # includes previous tests
+      insertions = 101100 # includes previous tests
       error = 2 * insertions / instance.width
 
       counter.each do |item, actual|

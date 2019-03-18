@@ -1,4 +1,5 @@
 require "math"
+require "./lib/matrix"
 
 # A Count-Min sketch is a probabilistic data structure used for summarizing
 # streams of data in sub-linear space.
@@ -24,11 +25,7 @@ require "math"
 # OPTIMIZE: support parallel hashing / increment / count operations when
 # supported by Crystal
 class Ish::CountMinSketch
-  @epsilon : Float32 | Float64
-  @delta   : Float32 | Float64
-  @width   : UInt32
-  @depth   : UInt32
-  @sketch  : Array(Array(UInt32))
+  @sketch  : Matrix(UInt32)
   @seeds   : Array({UInt32, UInt32})
 
   private macro assert_unit_interval(value)
@@ -63,28 +60,22 @@ class Ish::CountMinSketch
   # An excellent resource that provides visualisation of different
   # configurations can be found at
   # http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html
-  def initialize(@epsilon, @delta, seed = nil)
-    assert_unit_interval @epsilon
-    assert_unit_interval @delta
+  def initialize(epsilon, delta, seed = nil)
+    assert_unit_interval epsilon
+    assert_unit_interval delta
 
-    @width = (Math::E / @epsilon).ceil.to_u
-    @depth = Math.log(1 / @delta, Math::E).ceil.to_u
+    width = (Math::E / epsilon).ceil.to_u
+    depth = Math.log(1 / delta, Math::E).ceil.to_u
 
-    @sketch = Array.new(@depth) { Array.new(@width, 0_u32) }
+    @sketch = Matrix.new(depth, width, 0_u32)
 
     r = seed ? Random.new(seed) : Random.new
-
-    @seeds = @depth.times.map { {r.next_u, r.next_u} }.to_a
+    @seeds = depth.times.map { {r.next_u, r.next_u} }.to_a
   end
-
-  getter epsilon
-  getter delta
-  getter width
-  getter depth
 
   # Increases the count of *item* within the sketch by *amount* (default 1).
   def increment(item, amount : UInt32 = 1_u32)
-    buckets(item).each { |(row, i)| row.update(i, &.+(amount)) }
+    hash(item).each_with_index { |j, i| @sketch[i, j] += amount }
     self
   end
 
@@ -95,18 +86,24 @@ class Ish::CountMinSketch
 
   # Retrieves a frequency estimate for *item*.
   def count(item)
-    buckets(item).map { |(row, i)| row.unsafe_fetch i }.min
+    hash(item).map_with_index { |j, i| @sketch[i, j] }.min
+  end
+
+  # Gets the width of the sketch.
+  def width
+    _, width = @sketch.size
+    width
+  end
+
+  # Gets the depth of the sketch.
+  def depth
+    depth, _ = @sketch.size
+    depth
   end
 
   # Provides an Iterator with the set of hashes for *item*.
   private def hash(item)
-    @seeds.each.map { |seed| Hasher.hash item, seed, @width }
-  end
-
-  # Given an item, provide an Iterator containing a Tuple of each layer of the
-  # sketch and the associated bucket index.
-  private def buckets(item)
-    @sketch.each.zip hash(item)
+    @seeds.each.map { |seed| Hasher.hash item, seed, width }
   end
 
   # Universal hash functions.
