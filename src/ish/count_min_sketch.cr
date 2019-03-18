@@ -11,7 +11,7 @@ require "math"
 # provide may exceed the true frequency, but are garunteed to never
 # underestimate the true value.
 #
-#   `true frequency <= estimate
+#   `true frequency <= estimate`
 #
 # Error within estimates is proportional to the total aggregate number of
 # occurences seen, and to the epsilon. This also means significantly larger
@@ -37,7 +37,7 @@ class Ish::CountMinSketch
     end
   end
 
-  # Create a count-min sketch with the specified characteristics.
+  # Creates a count-min sketch with the specified characteristics.
   #
   # When choosing a configuration, you are often trying to minimize the error
   # term of the estimate. Acceptable errors in estimation fall within a range
@@ -82,23 +82,23 @@ class Ish::CountMinSketch
   getter width
   getter depth
 
-  # Increase the count of *item* within the sketch by *amount* (default 1).
+  # Increases the count of *item* within the sketch by *amount* (default 1).
   def increment(item, amount : UInt32 = 1_u32)
     buckets(item).each { |(row, i)| row.update(i, &.+(amount)) }
     self
   end
 
-  # Insert *item*, incrementing its count by 1.
+  # Inserts *item*, incrementing its count by 1.
   def <<(item)
     increment item, 1
   end
 
-  # Retrieve a frequency estimate for *item*.
+  # Retrieves a frequency estimate for *item*.
   def count(item)
     buckets(item).map { |(row, i)| row.unsafe_fetch i }.min
   end
 
-  # Provide an Iterator with the set of hashes for *item*.
+  # Provides an Iterator with the set of hashes for *item*.
   private def hash(item)
     @seeds.each.map { |seed| Hasher.hash item, seed, @width }
   end
