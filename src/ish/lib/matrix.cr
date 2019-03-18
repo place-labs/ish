@@ -6,8 +6,8 @@ module Ish
 
     # Creates a *m*x*n* matrix - **A** - with each element initialized with
     # *value*.
-    def self.new(m : Int32, n : Int32, value : T)
-      new(m, n) { value }
+    def self.new(m : Int, n : Int, value : T)
+      Matrix(T).new(m, n) { value }
     end
 
     # Creates an *m*x*n* matrix - **A**, yielding coordinates for initializing
@@ -20,7 +20,8 @@ module Ish
       @m = m.to_u32
       @n = n.to_u32
 
-      @buffer = Pointer(T).malloc(m * n) do |idx|
+      size = (m * n).to_i
+      @buffer = Pointer(T).malloc(size) do |idx|
         i, j = address idx
         yield i, j
       end
