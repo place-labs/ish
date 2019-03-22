@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.27.2">
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript" src="../js/doc.js"></script>
+<script type="text/javascript">
+  CrystalDoc.base_path = "../";
+</script>
+
+  <meta id="repository-name" content="github.com/aca-labs/ish">
+  <title>Ish::CountMinSketch - github.com/aca-labs/ish</title>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="repository-links">
+      <a href="../index.html">README</a>
+    </div>
+  </div>
+
+  <div class="search-results" class="hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="github.com/aca-labs/ish/Ish" data-name="ish">
+      <a href="../Ish.html">Ish</a>
+      
+        <ul>
+  
+  <li class="parent open current" data-id="github.com/aca-labs/ish/Ish/CountMinSketch" data-name="ish::countminsketch">
+      <a href="../Ish/CountMinSketch.html">CountMinSketch</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/aca-labs/ish/Ish/CountMinSketch/Hasher" data-name="ish::countminsketch::hasher">
+      <a href="../Ish/CountMinSketch/Hasher.html">Hasher</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="github.com/aca-labs/ish/Ish/Matrix" data-name="ish::matrix(t)">
+      <a href="../Ish/Matrix.html">Matrix</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Ish::CountMinSketch
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Ish/CountMinSketch.html">Ish::CountMinSketch</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>Overview</h2>
+
+  <p>A Count-Min sketch is a probabilistic data structure used for summarizing
+streams of data in sub-linear space.</p>
+
+<p>Performance is modelled two parameters: <em>epsilon</em> (error factor) and <em>delta</em>
+(probability of error).</p>
+
+<p>The sketch will provide estimate counts of the true frequency at a
+probability of at least <code>1 - delta</code>. Due to internal collissions counts
+provide may exceed the true frequency, but are garunteed to never
+underestimate the true value.</p>
+
+<p><code>true frequency <= estimate</code></p>
+
+<p>Error within estimates is proportional to the total aggregate number of
+occurences seen, and to the epsilon. This also means significantly larger
+truth values can dwarf smaller the error term producing more accurate
+estimates for items with the largest counts.</p>
+
+<p>Further information and proofs can be found at
+http://dimacs.rutgers.edu/~graham/pubs/papers/cmencyc.pdf</p>
+
+<p><span class="flag green">OPTIMIZE</span>  support parallel hashing / increment / count operations when
+supported by Crystal</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>Defined in:</h2>
+  
+    
+      <a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L27" target="_blank">
+        ish/count_min_sketch.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+  <h2>Constructors</h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new%28epsilon%2Cdelta%2Cseed%3Dnil%29-class-method" class="signature"><strong>.new</strong>(epsilon, delta, seed = <span class="n">nil</span>)</a>
+        
+          <div class="summary"><p>Creates a count-min sketch with the specified characteristics.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>Instance Method Summary</h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#%3C%3C%28item%29-instance-method" class="signature"><strong>#<<</strong>(item)</a>
+        
+          <div class="summary"><p>Inserts <em>item</em>, incrementing its count by 1.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#count%28item%29-instance-method" class="signature"><strong>#count</strong>(item)</a>
+        
+          <div class="summary"><p>Retrieves a frequency estimate for <em>item</em>.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#depth-instance-method" class="signature"><strong>#depth</strong></a>
+        
+          <div class="summary"><p>Gets the depth of the sketch.</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#increment%28item%2Camount%3AUInt32%3D1_u32%29-instance-method" class="signature"><strong>#increment</strong>(item, amount : UInt32 = <span class="n">1_u32</span>)</a>
+        
+          <div class="summary"><p>Increases the count of <em>item</em> within the sketch by <em>amount</em> (default 1).</p></div>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#width-instance-method" class="signature"><strong>#width</strong></a>
+        
+          <div class="summary"><p>Gets the width of the sketch.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>Constructor Detail</h2>
+  
+    <div class="entry-detail" id="new(epsilon,delta,seed=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(epsilon, delta, seed = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new%28epsilon%2Cdelta%2Cseed%3Dnil%29-class-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Creates a count-min sketch with the specified characteristics.</p>
+
+<p>When choosing a configuration, you are often trying to minimize the error
+term of the estimate. Acceptable errors in estimation fall within a range
+which is a factor of <em>epsilon</em>. Smaller values of <em>epsilon</em> should produce
+sketch configurations that provide estimates closer to the true values.
+However, this will increase the space required by the sketch.</p>
+
+<p>Error in estimation is also proportional to the total number of distinct
+items counted. A factor in the error term is a summation of total number
+of occurences of each distinct item. Another way to reduce the error term
+is by counting fewer things.</p>
+
+<p>Alternatively, you may try to reduce the frequency error and increase the
+chance of success. This is modeled as <code>1.0 - delta</code>. Increasing this number
+can produce sketch configurations with reduced error rates, but that will
+require more memory.</p>
+
+<p>A good rule of thumb for finding a starting configuration is to try an
+epsilon with as many significant digits as you have digits in your expected
+volume (e.g. given an expected volume of 5000 a good starting point for
+epsilon might be <code>0.0001</code>).</p>
+
+<p>An excellent resource that provides visualisation of different
+configurations can be found at
+http://crahen.github.io/algorithm/stream/count-min-sketch-point-query.html</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L63" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>Instance Method Detail</h2>
+  
+    <div class="entry-detail" id="&lt;&lt;(item)-instance-method">
+      <div class="signature">
+        
+        def <strong><<</strong>(item)
+
+        <a class="method-permalink" href="#%3C%3C%28item%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Inserts <em>item</em>, incrementing its count by 1.</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L83" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="count(item)-instance-method">
+      <div class="signature">
+        
+        def <strong>count</strong>(item)
+
+        <a class="method-permalink" href="#count%28item%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Retrieves a frequency estimate for <em>item</em>.</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L88" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="depth-instance-method">
+      <div class="signature">
+        
+        def <strong>depth</strong>
+
+        <a class="method-permalink" href="#depth-instance-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Gets the depth of the sketch.</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L99" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="increment(item,amount:UInt32=1_u32)-instance-method">
+      <div class="signature">
+        
+        def <strong>increment</strong>(item, amount : UInt32 = <span class="n">1_u32</span>)
+
+        <a class="method-permalink" href="#increment%28item%2Camount%3AUInt32%3D1_u32%29-instance-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Increases the count of <em>item</em> within the sketch by <em>amount</em> (default 1).</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L77" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="width-instance-method">
+      <div class="signature">
+        
+        def <strong>width</strong>
+
+        <a class="method-permalink" href="#width-instance-method">#</a>
+      </div>
+      
+        <div class="doc"><p>Gets the width of the sketch.</p></div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/aca-labs/ish/blob/5cce368d952e7e160e4b5ee1e7867f524dbb0d4c/src/ish/count_min_sketch.cr#L93" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
