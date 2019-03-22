@@ -25,8 +25,8 @@ require "./lib/matrix"
 # OPTIMIZE: support parallel hashing / increment / count operations when
 # supported by Crystal
 class Ish::CountMinSketch
-  @sketch  : Matrix(UInt32)
-  @seeds   : Array({UInt32, UInt32})
+  @sketch : Matrix(UInt32)
+  @seeds : Array({UInt32, UInt32})
 
   private macro assert_unit_interval(value)
     if {{value}} <= 0 || {{value}} >= 1
