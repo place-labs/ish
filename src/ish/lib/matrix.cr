@@ -4,14 +4,13 @@ module Ish
     @n : UInt32
     @buffer : Pointer(T)
 
-    # Creates a *m*x*n* matrix - **A** - with each element initialized with
-    # *value*.
+    # Creates a *m* x *n* matrix with each element initialized as *value*.
     def self.new(m : Int, n : Int, value : T)
       Matrix(T).new(m, n) { value }
     end
 
-    # Creates an *m*x*n* matrix - **A**, yielding coordinates for initializing
-    # each element.
+    # Creates an *m* x *n* matrix, yielding indicies for each element to
+    # provide an initial value.
     def initialize(m : Int, n : Int, &block : UInt32, UInt32 -> T)
       if m < 1 || n < 1
         raise ArgumentError.new("Matrix dimensions must be natural numbers")
@@ -27,7 +26,7 @@ module Ish
       end
     end
 
-    # Retrieves the value **A**ᵢ,ⱼ.
+    # Retrieves the value of the element at *i*,*j*.
     #
     # Indicies are zero-based. Negative values may be passed for *i* and *j* to
     # enable reverse indexing such that `self[-1, -1] == self[m - 1, n - 1]`
@@ -37,8 +36,8 @@ module Ish
       @buffer[idx]
     end
 
-    # Sets the value of element **A**ᵢ,ⱼ.
-    def []=(i : Int, j : Int, value : T)\
+    # Sets the value of the element at *i*,*j*.
+    def []=(i : Int, j : Int, value : T)
       idx = index i, j
       @buffer[idx] = value
     end
@@ -48,8 +47,8 @@ module Ish
       {@m, @n}
     end
 
-    # Yields the current element at **A**ᵢ,ⱼ. and updates the
-    # value with the block's return value.
+    # Yields the current element at *i*,*j* and updates the value with the
+    # block's return value.
     def update(i, j, &block : T -> T)
       idx = index i, j
       @buffer[idx] = yield @buffer[idx]
